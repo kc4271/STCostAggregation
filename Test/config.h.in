@@ -1,0 +1,3 @@
+#define EXE_NAME "@EXE_NAME@"
+#define ROOT_PATH "@ROOT_PATH@/"
+#define RUN_PATH "@RUN_PATH@"

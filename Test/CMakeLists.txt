@@ -1,0 +1,20 @@
+PROJECT(STCostAggregation_TEST)
+ 
+# configure a header file to pass some of the CMake settings
+# to the source code
+configure_file (
+  "${PROJECT_SOURCE_DIR}/config.h.in"
+  "${PROJECT_BINARY_DIR}/config.h"
+  )
+
+AUX_SOURCE_DIRECTORY(. SOURCE_FILES)
+FILE(GLOB HEADER_FILES  *.h)
+SOURCE_GROUP("Header Files" FILES ${HEADER_FILES})
+SOURCE_GROUP("Source Files" FILES ${SOURCE_FILES})
+
+FIND_PACKAGE(OpenCV REQUIRED) 
+INCLUDE_DIRECTORIES("${PROJECT_BINARY_DIR}")
+ADD_EXECUTABLE(${TEST_NAME} ${SOURCE_FILES} ${HEADER_FILES})
+TARGET_LINK_LIBRARIES(${TEST_NAME} ${OpenCV_LIBS})
+
+#INSTALL (TARGETS ${TEST_NAME} DESTINATION bin)
