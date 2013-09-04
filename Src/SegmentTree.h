@@ -63,9 +63,9 @@ private:
 	cv::Size m_imgSize;
 	std::vector<TreeNode> m_tree;
 public:
-	void BuildSegmentTree(cv::Mat img, float sigma, float tau, CWeightProvider &weightProvider);
+	void BuildSegmentTree(cv::Size size, float sigma, float tau, CWeightProvider &weightProvider);
 	void UpdateTable(float sigma_range);
-	void Filter(cv::Mat costVol, int maxLevel);
+	void Filter(cv::Mat costVol, int channel);
 };
 
 class CColorWeight: public CWeightProvider {

@@ -35,9 +35,9 @@ THE SOFTWARE.
 #include <iostream>
 using namespace std;
 
-void CSegmentTree::BuildSegmentTree(cv::Mat img, float sigma, float tau, CWeightProvider &weightProvider) {
+void CSegmentTree::BuildSegmentTree(cv::Size size, float sigma, float tau, CWeightProvider &weightProvider) {
 	UpdateTable(sigma);
-	m_imgSize = img.size();
+	m_imgSize = size;
 	int pixelsNum = m_imgSize.area();
 
 //step 1: build segment tree
@@ -145,36 +145,36 @@ void CSegmentTree::UpdateTable(float sigma_range) {
 	}
 }
 
-void CSegmentTree::Filter(cv::Mat costVol, int maxLevel) {
+void CSegmentTree::Filter(cv::Mat costVol, int channel) {
 	cv::Mat costBuffer = costVol.clone();
 	
-	KIdx_<float, 3>  costPtr((float *)costVol.data, m_imgSize.height, m_imgSize.width, maxLevel);
-	KIdx_<float, 3>  bufferPtr((float *)costBuffer.data, m_imgSize.height, m_imgSize.width, maxLevel);
+	KIdx_<float, 3>  costPtr((float *)costVol.data, m_imgSize.height, m_imgSize.width, channel);
+	KIdx_<float, 3>  bufferPtr((float *)costBuffer.data, m_imgSize.height, m_imgSize.width, channel);
 
 
 	int pixelsNum = m_imgSize.area();
 //first pass: from leaf to root
 	for(int i = pixelsNum - 1;i >= 0;i--) {
 		TreeNode &node = m_tree[i];
-		float *cost = &bufferPtr(node.id * maxLevel);
+		float *cost = &bufferPtr(node.id * channel);
 		for(int z = 0;z < node.childrenNum;z++) {
-			float *child_cost = &bufferPtr(node.children[z].id * maxLevel);
+			float *child_cost = &bufferPtr(node.children[z].id * channel);
 			float weight = m_table[node.children[z].dist];
-			for(int k = 0;k < maxLevel;k++) {
+			for(int k = 0;k < channel;k++) {
 				cost[k] += child_cost[k] * weight;
 			}
 		}
 	}
 
 //second pass: from root to leaf
-	memcpy(&costPtr(0), &bufferPtr(0), sizeof(float) * maxLevel);
+	memcpy(&costPtr(0), &bufferPtr(0), sizeof(float) * channel);
 	for(int i = 1;i < pixelsNum;i++) {
 		TreeNode &node = m_tree[i];
-		float *final_cost = &costPtr(node.id * maxLevel);
-		float *cur_cost = &bufferPtr(node.id * maxLevel);
-		float *father_cost = &costPtr(node.father.id * maxLevel);
+		float *final_cost = &costPtr(node.id * channel);
+		float *cur_cost = &bufferPtr(node.id * channel);
+		float *father_cost = &costPtr(node.father.id * channel);
 		float weight = m_table[node.father.dist];
-		for(int k = 0;k < maxLevel;k++) {
+		for(int k = 0;k < channel;k++) {
 			final_cost[k] = weight * (father_cost[k] - weight * cur_cost[k]) + cur_cost[k];
 		}
 	}

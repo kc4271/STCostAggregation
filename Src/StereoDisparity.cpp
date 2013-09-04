@@ -75,7 +75,7 @@ void stereo_disparity_normal(cv::InputArray left_image, cv::InputArray right_ima
 //step 2: cost aggregation
 	CSegmentTree stree;
 	CColorWeight cWeight(imL);
-	stree.BuildSegmentTree(imL, sigma, TAU, cWeight);
+	stree.BuildSegmentTree(imL.size(), sigma, TAU, cWeight);
 	stree.Filter(costVol, max_dis_level);
 
 //step 3: disparity computation
@@ -112,14 +112,14 @@ void stereo_disparity_iteration(cv::InputArray left_image, cv::InputArray right_
 	CColorWeight colorLWeight(imL), colorRWeight(imR);
 
 	//left disparity
-	stree.BuildSegmentTree(imL, SIGMA_ONE, TAU, colorLWeight);
+	stree.BuildSegmentTree(imL.size(), SIGMA_ONE, TAU, colorLWeight);
 	stree.Filter(costVolLeft, max_dis_level);
 	cv::Mat disparityLeft = dispHelper.GetDisparity_WTA((float *)costVolLeft.data,
 		imageSize.width, imageSize.height, max_dis_level);
 	MeanFilter(disparityLeft, disparityLeft, 3);
 
 	//right disparity
-	stree.BuildSegmentTree(imR, SIGMA_ONE, TAU, colorRWeight);
+	stree.BuildSegmentTree(imR.size(), SIGMA_ONE, TAU, colorRWeight);
 	stree.Filter(costVolRight, max_dis_level);
 	cv::Mat disparityRight =  dispHelper.GetDisparity_WTA((float *)costVolRight.data,
 		imageSize.width, imageSize.height, max_dis_level);
@@ -149,7 +149,7 @@ void stereo_disparity_iteration(cv::InputArray left_image, cv::InputArray right_
 //re-segmentation and second run	
 	cv::Mat costVol = dispHelper.GetMatchingCost(imL, imR, max_dis_level);
 	CColorDepthWeight colorDepthWeight(imL, disparityLeft, mask, max_dis_level);
-	stree.BuildSegmentTree(imL, sigma, TAU, colorDepthWeight);
+	stree.BuildSegmentTree(imL.size(), sigma, TAU, colorDepthWeight);
 	stree.Filter(costVol, max_dis_level);
 	cv::Mat disparity = dispHelper.GetDisparity_WTA((float *)costVol.data, 
 		imageSize.width, imageSize.height, max_dis_level);
